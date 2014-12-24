@@ -6,19 +6,21 @@
 
 
 (defn load-map []
-      [
-	[{:name "Great Hall" :items ["Sword" "Spear" "Chicken McNuggets"]} {:name "Master Bedroom"} {:name "Master Bathroom"}]
-	[{:name "Study"} {:name "Kitchen"} {:name "Guest Bedroom"}]
-	[{:name "Garage"} {:name "Laundry Room"} {:name "Guest Bathroom"}]
-      ])
+  { :great-hall {:name "Great Hall" :items ["Sword" "Spear" "Chicken McNuggets"] s: :study e: :master-bedroom} :master-bedroom {:name "Master Bedroom"} :master-bathroom {:name "Master Bathroom"}
+   :study {:name "Study"} :kitchen {:name "Kitchen"} :guest-bedroom {:name "Guest Bedroom"}
+   :gasrage {:name "Garage"} :laundry-room {:name "Laundry Room"} :guest-bathroom {:name "Guest Bathroom"}
+    }
 
 
-(defn process-command [cmd]
-      (let [clean-cmd (str/trim (str/lower-case cmd))]
-         (cond 
-                (= clean-cmd "exit") :exit
-		(= clean-cmd "move") :room-change
-                 :else :unrecognized)))
+  (defn process-command [cmd]
+    (let [clean-cmd (str/trim (str/lower-case cmd))]
+      (cond 
+       (= clean-cmd "exit") :exit
+       (= clean-cmd "north") :north
+       (= clean-cmd "south") :south
+       (= clean-cmd "east") :east
+       (= clean-cmd "west") :west
+       :else :unrecognized))))
 
 
 (defn eval-loop []

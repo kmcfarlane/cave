@@ -6,7 +6,7 @@
 
 
 (defn load-map []
-  { :great-hall {:name "Great Hall" :items ["Sword" "Spear" "Chicken McNuggets"] s: :study e: :master-bedroom} :master-bedroom {:name "Master Bedroom"} :master-bathroom {:name "Master Bathroom"}
+  { :great-hall {:name "Great Hall" :items ["Sword" "Spear" "Chicken McNuggets"] s: :study e: :master-bedroom} :master-bedroom {:name "Master Bedroom" w: :great-hall s: kitchen w: :master-bathroom} :master-bathroom {:name "Master Bathroom"}
    :study {:name "Study"} :kitchen {:name "Kitchen"} :guest-bedroom {:name "Guest Bedroom"}
    :gasrage {:name "Garage"} :laundry-room {:name "Laundry Room"} :guest-bathroom {:name "Guest Bathroom"}
     }

@@ -1,4 +1,3 @@
-
 (ns cave.core
  (:gen-class :main true))
 
@@ -12,29 +11,31 @@
 (def LocationMap {s/Keyword {(s/required-key :name) s/Str (s/optional-key :description) s/Str s/Keyword s/Keyword}})
 
 
-( defn load-locations []
+( defn load-test-locations []
 
   {
    :town-square {:name "Town Square" :description "Center of the city!" :e :great-hall :n :Blacksmiths-shop :w :plains}
-    :great-hall  {:name "Great Hall" :w :town-square :e :throne-room :n :master-bedroom :s :study}
-    :master-bedroom {:name "Master Bedroom" :e :master-bathroom :s :great-hall}
-    :study {:name "Study" :n :great-hall}
-    :throne-room {:name "Throne Room" :w :great-hall}
+   :great-hall  {:name "Great Hall" :w :town-square :e :throne-room :n :master-bedroom :s :study}
+   :master-bedroom {:name "Master Bedroom" :e :master-bathroom :s :great-hall}
+   :study {:name "Study" :n :great-hall}
+   :throne-room {:name "Throne Room" :w :great-hall}
    :master-bathroom {:name "Master Bathroom" :w :master-bedroom}
    :Blacksmiths-shop {:name "Blacksmith's shop" :s :town-square}
    :plains {:name "Plains" :e :town-square :n :forest :s :cave}
    :forest {:name "Forest" :s :plains}
    :cave {:name "Cave" :n :plains}
-   
-   }
-  
-  )
+   })
 
+
+(defn load-locations 
+  ([] (load-test-locations))
+  ([url] {}))
 
 (defn process-command [cmd]
   (let [clean-cmd (str/trim (str/lower-case cmd))
         lookup-result (command-map cmd)]
       (if (nil? lookup-result) :unrecognized lookup-result)))
+
 
 (defn write-prompt [loc-key locations]
   (let [loc (loc-key locations)]
@@ -43,15 +44,14 @@
       (contains? loc :description)
       (println "-- " (:description loc)))
     (print "Your command, sire? ")
-    (flush)
-  )
-)
+    (flush)))
+
 
 (defn load-and-validate []
   (let [m (load-locations)]
     (s/validate LocationMap m) ;throws an exception if data doesn't validate
-    m )  ;return successfully loaded location map
-)
+     m))  ;return successfully loaded location map
+
 
 (defn eval-loop [m]
 
@@ -68,11 +68,7 @@
              :else (println "Unrecognized command"))
             
             (if (not (= cmd :exit))
-              (recur a))
-                 )
-               )
-        )
-)
+              (recur a))))))
 
 (defn -main
   "Generic Clojure-based text adventure game by Camden McFarlane and Keith McFarlane"
@@ -80,5 +76,5 @@
   (try
     (let [m (load-and-validate)]
       (eval-loop m))
-    (catch Exception e (println "Could not read location data."))))
+    (catch Exception e (println "An error occurred: " (.getMessage e)))))
 

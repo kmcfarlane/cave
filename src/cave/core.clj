@@ -6,13 +6,16 @@
          '[clojure.edn :as edn])
 
 ;Command maps
-(def command-map {"exit" :exit "north" :n "south" :s "east" :e "west" :w})
+(def command-verb-map {"exit" :exit "go" :go})
+(def command-go-directions {"north" :n "south" :s "east" :e "west" :w})
 
 ;Schema definitions
 (def LocationMap {s/Keyword {(s/required-key :name) s/Str (s/optional-key :description) s/Str s/Keyword s/Keyword}})
 
+;Regular expressions
+(def command-structure-regex #"\s*([A-Za-z]+)(\s+([A-Za-z0-9]+))?\s*") ;Matches (white space)(command)(white space)(opt parameter)(white space)
 
-( defn load-test-locations []
+(defn load-test-locations []
 
   {
    :town-square {:name "Town Square" :description "Center of the city!" :e :great-hall :n :Blacksmiths-shop :w :plains}
@@ -29,17 +32,21 @@
 
 
 (defn process-command [cmd]
-  (let [clean-cmd (str/trim (str/lower-case cmd))
-        lookup-result (command-map cmd)]
-      (if (nil? lookup-result) :unrecognized lookup-result)))
+  (let [cmd-vec       (re-matches command-structure-regex cmd)
+        lookup-result (if (nil? cmd-vec) nil (command-verb-map (cmd-vec 1)))] ;Second vector position is verb
+    (if (nil? lookup-result)
+      (vector :unrecognized)
+      (vector lookup-result (into [] (rest (rest (rest cmd-vec)))))))) ;Returns vector with command and params or :unrecognized
 
 
 (defn write-prompt [loc-key locations]
   (let [loc (loc-key locations)]
+    (println)
     (println (format "[%s]" (:name loc)))
     (if
       (contains? loc :description)
       (println "-- " (:description loc)))
+    (println)
     (print "Your command, sire? ")
     (flush)))
 
@@ -69,14 +76,16 @@
           (write-prompt @a m)
           
           (let [ln (read-line) 
-                cmd (process-command ln)]
+                cmd-result (process-command ln)
+                cmd-verb (cmd-result 0)]
 
             (cond
-             (directional-cmd? cmd) (if (contains? ( m @a) cmd) (swap! a (fn [x] (cmd (@a m)))) (println "Sorry, can't go that way!"))
-             (= cmd :exit) (println "Goodbye!")
+             (= cmd-verb :go) (let [direction (command-go-directions ((cmd-result 1) 0))]
+                                      (if (contains? ( m @a) direction) (swap! a (fn [x] (direction (@a m)))) (println "Sorry, can't go that way!")))
+             (= cmd-verb :exit) (println "Goodbye!")
              :else (println "Unrecognized command"))
             
-            (if (not (= cmd :exit))
+            (if (not (= cmd-verb :exit))
               (recur a))))))
 
 (defn -main

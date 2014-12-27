@@ -2,7 +2,8 @@
  (:gen-class :main true))
 
 (require '[clojure.string :as str]
-         '[schema.core :as s])
+         '[schema.core :as s]
+         '[clojure.edn :as edn])
 
 ;Command maps
 (def command-map {"exit" :exit "north" :n "south" :s "east" :e "west" :w})
@@ -26,11 +27,6 @@
    :cave {:name "Cave" :n :plains}
    })
 
-
-(defn load-locations 
-  ([] (load-test-locations))
-  ([url] {}))
-
 (defn process-command [cmd]
   (let [clean-cmd (str/trim (str/lower-case cmd))
         lookup-result (command-map cmd)]
@@ -47,10 +43,20 @@
     (flush)))
 
 
-(defn load-and-validate []
-  (let [m (load-locations)]
-    (s/validate LocationMap m) ;throws an exception if data doesn't validate
-     m))  ;return successfully loaded location map
+(defn validate-map [m]
+  (s/validate LocationMap m))
+
+
+(defn directional-cmd? [k]
+  (contains? #{:n :s :e :w} k))
+
+
+(defn load-and-validate
+  "Load and validate the location map. If a filename is provided, load mapa data from the file; otherwise, use test data."
+  ([] (let [m (load-test-locations)]
+    (validate-map m)            ;throws an exception if data doesn't validate
+     m))                        ;return successfully loaded test location map
+  ([file-path] (clojure.edn/read-string (slurp file-path))))
 
 
 (defn eval-loop [m]
@@ -63,7 +69,7 @@
                 cmd (process-command ln)]
 
             (cond
-             (contains? #{:n :s :e :w} cmd) (if (contains? ( m @a) cmd) (swap! a (fn [x] (cmd (@a m)))) (println "Sorry, can't go that way!"))
+             (directional-cmd? cmd) (if (contains? ( m @a) cmd) (swap! a (fn [x] (cmd (@a m)))) (println "Sorry, can't go that way!"))
              (= cmd :exit) (println "Goodbye!")
              :else (println "Unrecognized command"))
             
@@ -74,7 +80,7 @@
   "Generic Clojure-based text adventure game by Camden McFarlane and Keith McFarlane"
   [& args]
   (try
-    (let [m (load-and-validate)]
+    (let [m (if (> (count args) 0) (load-and-validate (first args)) (load-and-validate))]
       (eval-loop m))
     (catch Exception e (println "An error occurred: " (.getMessage e)))))
 

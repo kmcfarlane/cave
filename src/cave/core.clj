@@ -2,29 +2,27 @@
 (ns cave.core
  (:gen-class :main true))
 
-(require '[clojure.string :as str])
+(require '[clojure.string :as str]
+         '[schema.core :as s])
+
+;Schema definitions
+(def LocationMap {s/Keyword {(s/required-key :name) s/Str (s/optional-key :description) s/Str s/Keyword s/Keyword}})
 
 
-( defn load-map []
-  { :great-hall {:name "Great Hall" :items ["Sword" "Spear" "Chicken McNuggets"] :s :study :e :master-bedroom}
-   :master-bedroom {:name "Master Bedroom" :w :great-hall :s :kitchen :e :master-bathroom}
-   :master-bathroom {:name "Master Bathroom"}
-   :study {:name "Study" :s :great-hall}
-   :kitchen {:name "Kitchen"}
-   :guest-bedroom {:name "Guest Bedroom"}
-   :garage {:name "Garage"}
-   :laundry-room {:name "Laundry Room"}
-   :guest-bathroom {:name "Guest Bathroom"}
-   })
+( defn load-locations []
 
-( defn load-map-2 []
-
-  { :town-square {:name "Town Square" :e :great-hall}
+  {
+   :town-square {:name "Town Square" :description "Center of the city!" :e :great-hall :n :Blacksmiths-shop :w :plains}
     :great-hall  {:name "Great Hall" :w :town-square :e :throne-room :n :master-bedroom :s :study}
     :master-bedroom {:name "Master Bedroom" :e :master-bathroom :s :great-hall}
     :study {:name "Study" :n :great-hall}
     :throne-room {:name "Throne Room" :w :great-hall}
-    :master-bathroom {:name "Master Bathroom" :w :master-bedroom}
+   :master-bathroom {:name "Master Bathroom" :w :master-bedroom}
+   :Blacksmiths-shop {:name "Blacksmith's shop" :s :town-square}
+   :plains {:name "Plains" :e :town-square :n :forest :s :cave}
+   :forest {:name "Forest" :s :plains}
+   :cave {:name "Cave" :n :plains}
+   
    }
   
   )
@@ -41,32 +39,48 @@
      (= clean-cmd "west") :w
      :else :unrecognized)))
 
-
-(defn eval-loop []
-      (loop [m (load-map) 
-      	     a (atom :great-hall) ] 
-	       (do
-                 (println (format "(%s)" (:name (@a m))))
-                 (print "Your command, sire? ")
-	         (flush)
-	         (let [ln (read-line) 
-		       cmd (process-command ln)]
-		       (cond
-                        (contains? #{:n :s :e :w} cmd) (swap! a (fn [x] (cmd (@a m))))
-                      	 (= cmd :exit) (println "Goodbye!")
-			 :else (println "Unrecognized command"))
-
-               	         (if (not (= cmd :exit))
-                           (recur m a))
-                 )
-               )
-       )
+(defn write-prompt [loc-key locations]
+  (let [loc (loc-key locations)]
+    (println (format "[%s]" (:name loc)))
+    (if
+      (contains? loc :description)
+      (println "-- " (:description loc)))
+    (print "Your command, sire? ")
+    (flush)
+  )
 )
 
+(defn load-and-validate []
+  (let [m (load-locations)]
+    (s/validate LocationMap m) ;throws an exception if data doesn't validate
+    m )  ;return successfully loaded location map
+)
+(defn eval-loop [m]
 
+      (loop [a (atom :town-square)] 
+        (do
+          (write-prompt @a m)
+          
+          (let [ln (read-line) 
+                cmd (process-command ln)]
+
+            (cond
+             (contains? #{:n :s :e :w} cmd) (if (contains? ( m @a) cmd) (swap! a (fn [x] (cmd (@a m)))) (println "Sorry, can't go that way!"))
+             (= cmd :exit) (println "Goodbye!")
+             :else (println "Unrecognized command"))
+            
+            (if (not (= cmd :exit))
+              (recur a))
+                 )
+               )
+        )
+)
 
 (defn -main
-  "I don't do a whole lot."
+  "Generic Clojure-based text adventure game by Camden McFarlane and Keith McFarlane"
   [& args]
-	(eval-loop))
+  (try
+    (let [m (load-and-validate)]
+      (eval-loop m))
+    (catch Exception e (println "Could not read location data."))))
 

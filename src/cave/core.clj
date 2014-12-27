@@ -27,6 +27,7 @@
    :cave {:name "Cave" :n :plains}
    })
 
+
 (defn process-command [cmd]
   (let [clean-cmd (str/trim (str/lower-case cmd))
         lookup-result (command-map cmd)]
@@ -56,7 +57,9 @@
   ([] (let [m (load-test-locations)]
     (validate-map m)            ;throws an exception if data doesn't validate
      m))                        ;return successfully loaded test location map
-  ([file-path] (clojure.edn/read-string (slurp file-path))))
+  ([file-path] (let [m (edn/read-string (slurp file-path))]
+    (validate-map m)            ;throws an exception if data doesn't validate
+     m)))                       ;return map loaded from disk
 
 
 (defn eval-loop [m]

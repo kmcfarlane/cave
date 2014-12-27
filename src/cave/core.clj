@@ -5,6 +5,9 @@
 (require '[clojure.string :as str]
          '[schema.core :as s])
 
+;Command maps
+(def command-map {"exit" :exit "north" :n "south" :s "east" :e "west" :w})
+
 ;Schema definitions
 (def LocationMap {s/Keyword {(s/required-key :name) s/Str (s/optional-key :description) s/Str s/Keyword s/Keyword}})
 
@@ -28,16 +31,10 @@
   )
 
 
-
 (defn process-command [cmd]
-  (let [clean-cmd (str/trim (str/lower-case cmd))]
-    (cond 
-     (= clean-cmd "exit") :exit
-     (= clean-cmd "north") :n
-     (= clean-cmd "south") :s
-     (= clean-cmd "east") :e
-     (= clean-cmd "west") :w
-     :else :unrecognized)))
+  (let [clean-cmd (str/trim (str/lower-case cmd))
+        lookup-result (command-map cmd)]
+      (if (nil? lookup-result) :unrecognized lookup-result)))
 
 (defn write-prompt [loc-key locations]
   (let [loc (loc-key locations)]
@@ -55,6 +52,7 @@
     (s/validate LocationMap m) ;throws an exception if data doesn't validate
     m )  ;return successfully loaded location map
 )
+
 (defn eval-loop [m]
 
       (loop [a (atom :town-square)] 

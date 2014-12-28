@@ -3,11 +3,11 @@
 
 (require '[clojure.string :as str]
          '[schema.core :as s]
-         '[clojure.edn :as edn])
+         '[clojure.edn :as edn]
+         '[cave.command :as cmd])
 
 ;Command maps
 (def command-verb-map {"exit" :exit "go" :go})
-(def command-go-directions {"north" :n "south" :s "east" :e "west" :w})
 
 ;Schema definitions
 (def LocationMap {s/Keyword {(s/required-key :name) s/Str (s/optional-key :description) s/Str s/Keyword s/Keyword}})
@@ -60,7 +60,7 @@
 
 
 (defn load-and-validate
-  "Load and validate the location map. If a filename is provided, load mapa data from the file; otherwise, use test data."
+  "Load and validate the location map. If a filename is provided, load map data from the file; otherwise, use test data."
   ([] (let [m (load-test-locations)]
     (validate-map m)            ;throws an exception if data doesn't validate
      m))                        ;return successfully loaded test location map
@@ -71,22 +71,24 @@
 
 (defn eval-loop [m]
 
-      (loop [a (atom :town-square)] 
+      (loop [current-loc (atom :town-square)] 
         (do
-          (write-prompt @a m)
+          (write-prompt @current-loc  m)
           
           (let [ln (read-line) 
                 cmd-result (process-command ln)
                 cmd-verb (cmd-result 0)]
 
             (cond
-             (= cmd-verb :go) (let [direction (command-go-directions ((cmd-result 1) 0))]
-                                      (if (contains? ( m @a) direction) (swap! a (fn [x] (direction (@a m)))) (println "Sorry, can't go that way!")))
+             (= cmd-verb :go) (let [new-direction (cmd/go ((cmd-result 1) 0) @current-loc m)]
+                                (if (nil? new-direction)
+                                  (println "Sorry, can't go that way!")
+                                  (swap! current-loc  (fn [x] new-direction))))
              (= cmd-verb :exit) (println "Goodbye!")
              :else (println "Unrecognized command"))
             
             (if (not (= cmd-verb :exit))
-              (recur a))))))
+              (recur current-loc ))))))
 
 (defn -main
   "Generic Clojure-based text adventure game by Camden McFarlane and Keith McFarlane"

@@ -1,13 +1,18 @@
-  {
-   :town-square {:name "Town Square" :description "Center of the city!" :e :great-hall :n :Blacksmiths-shop :w :plains}
-   :great-hall  {:name "Great Hall" :w :town-square :e :throne-room :n :master-bedroom :s :study}
-   :master-bedroom {:name "Master Bedroom" :e :master-bathroom :s :great-hall}
-   :study {:name "Study" :n :great-hall}
-   :throne-room {:name "Throne Room" :w :great-hall}
-   :master-bathroom {:name "Master Bathroom" :w :master-bedroom}
-   :Blacksmiths-shop {:name "Blacksmith's shop" :s :town-square}
-   :plains {:name "Plains" :e :town-square :n :forest :s :cave}
-   :forest {:name "Forest" :s :plains}
-   :cave {:name "Cave entrance" :n :plains :s :catacombs}
-   :catacombs {:name "The Catacombs" :n :cave}
-   }
+{
+ :start-location :plains
+ 
+ :location-list
+ {
+  :town-square {:name "Town Square" :description "Center of the city!" :e :great-hall :n :Blacksmiths-shop :w :plains}
+  :great-hall  {:name "Great Hall" :w :town-square :e :throne-room :n :master-bedroom :s :study}
+  :master-bedroom {:name "Master Bedroom" :e :master-bathroom :s :great-hall}
+  :study {:name "Study" :n :great-hall}
+  :throne-room {:name "Throne Room" :w :great-hall}
+  :master-bathroom {:name "Master Bathroom" :w :master-bedroom}
+  :Blacksmiths-shop {:name "Blacksmith's shop" :s :town-square}
+  :plains {:name "Plains" :e :town-square :n :forest :s :cave}
+  :forest {:name "Forest" :s :plains}
+  :cave {:name "Cave entrance" :n :plains :s :catacombs}
+  :catacombs {:name "The Catacombs" :n :cave}
+  }
+ }

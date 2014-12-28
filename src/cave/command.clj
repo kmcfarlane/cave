@@ -6,3 +6,6 @@
   (let [direction (command-go-directions direction-str)]
     (if (contains? ( locations current-loc ) direction)
       (direction (current-loc locations)) nil )))
+
+(defn inventory [inventory]
+  (str inventory))

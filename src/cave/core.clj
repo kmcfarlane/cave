@@ -13,7 +13,8 @@
 
 ;Schema definitions
 (def LocationMap {(s/required-key :start-location) s/Keyword
-                  (s/required-key :location-list) {s/Keyword {(s/required-key :name) s/Str (s/optional-key :description) s/Str s/Keyword s/Keyword}}})
+                  (s/required-key :location-list) {s/Keyword {(s/required-key :name) s/Str (s/optional-key :description) s/Str s/Keyword s/Keyword
+                                                              (s/optional-key :visited) s/Bool}}})
 
 ;Regular expressions
 (def command-structure-regex #"\s*([A-Za-z]+)(\s+([A-Za-z0-9]+))?\s*") ;Matches (white space)(command)(white space)(opt parameter)(white space)
@@ -36,7 +37,7 @@
         ]
     (if (nil? lookup-result)
       (vector :unrecognized)
-      (vector lookup-result cmd-target)))) ;Returns vector with command and params or :unrecognized
+      (vector lookup-result cmd-target)))) ;Returns vector with command and target or :unrecognized
 
 
 (defn write-prompt [loc-key locations]
@@ -44,8 +45,8 @@
     (println)
     (println (format "[%s]" (:name loc)))
     (if
-      (contains? loc :description)
-      (println "-- " (:description loc)))
+      (and (contains? loc :description) (not (loc :visited)))
+      (println (str "--" \newline (:description loc) \newline "--")))
     (println)
     (print "Your command, sire? ")
     (flush)))
@@ -75,10 +76,11 @@
           
           (let [ln (read-line) 
                 cmd-result (process-command ln)
-                [cmd-verb cmd-target] cmd-result]
+                [cmd-verb cmd-target] cmd-result
+                mod-loc (assoc-in locations [@current-loc :visited] true)]
 
             (cond
-             (= cmd-verb :go) (let [new-location (cmd/go cmd-target @current-loc locations)]
+             (= cmd-verb :go) (let [new-location (cmd/go cmd-target @current-loc mod-loc)]
                                 (if (nil? new-location)
                                   (println "Sorry, can't go that way!")
                                   (swap! current-loc  (fn [x] new-location))))
@@ -87,7 +89,9 @@
              :else (println "Unrecognized command"))
             
             (if (not (= cmd-verb :exit))
-              (recur locations current-loc inventory ))))))
+              (recur mod-loc 
+                     current-loc
+                     inventory ))))))
 
 (defn -main
   "Generic Clojure-based text adventure game by Camden McFarlane and Keith McFarlane"

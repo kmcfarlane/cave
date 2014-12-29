@@ -3,16 +3,83 @@
  
  :location-list
  {
-  :town-square {:name "Town Square" :description "Center of the city!" :e :great-hall :n :Blacksmiths-shop :w :plains}
-  :great-hall  {:name "Great Hall" :w :town-square :e :throne-room :n :master-bedroom :s :study}
+  :town-square-west {:name "Town Square West"
+                     :description 
+"You are at the west end of a bustling town square.
+Merchants, laborers, and various citizens of the
+local township are gathered here to trade and to catch
+up on the latest gossip. To the north, you see the
+local blacksmith's shop, and to the south is the
+butcher's stand. To the west lie the Great Plains.
+The Town Square continues to the east." 
+                     :e :town-square-east
+                     :n :blacksmith
+                     :s :butcher
+                     :w :plains}
+  
+  :town-square-east {:name "Town Square East"
+                     :description
+"You are at the east end of a bustling town square.
+Merchants, laborers, and various citizens of the local
+township are gathered here to trade and to catch up
+on the latest gossip. To the north, you see a tavern,
+and to the south is the residence of the town's jeweler
+(with several rough-looking mercenaries posted just
+outside his doors). To the east, you can see imposing
+gates protecting a menacing castle. The Town Square
+continues to the west." 
+                     :w :town-square-west
+                     :e :castle-gates
+                     :n :tavern
+                     :s :jeweler
+                     }
+
+  :tavern {:name "Zedd's Tavern"
+           :description
+"" 
+           :s :town-square-east
+          }
+
+  :butcher {:name "Butcher"
+           :description
+"" 
+           :n :town-square-west
+          }
+
+
+  :jeweler {:name "Jeweler"
+            :description
+"" 
+            :n :town-square-east
+           }
+
+  :castle-gates {:name "Castle Gates"
+                 :description
+"" 
+                 :w :town-square-east
+                 :e :great-hall
+           }
+
+  
+  :great-hall  {:name "Great Hall" :w :castle-gates :e :throne-room :n :master-bedroom :s :study}
+  
   :master-bedroom {:name "Master Bedroom" :e :master-bathroom :s :great-hall}
+  
   :study {:name "Study" :n :great-hall}
+  
   :throne-room {:name "Throne Room" :w :great-hall}
+  
   :master-bathroom {:name "Master Bathroom" :w :master-bedroom}
-  :Blacksmiths-shop {:name "Blacksmith's shop" :s :town-square}
-  :plains {:name "Plains" :e :town-square :n :forest :s :cave}
+  
+  :blacksmith {:name "Blacksmith" :s :town-square-west}
+  
+  :plains {:name "Great Plains" :e :town-square-west :n :forest :s :cave}
+  
   :forest {:name "Forest" :s :plains}
+  
   :cave {:name "Cave entrance" :n :plains :s :catacombs}
+  
   :catacombs {:name "The Catacombs" :n :cave}
+  
   }
  }

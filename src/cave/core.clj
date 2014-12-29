@@ -8,6 +8,7 @@
 
 ;Command maps
 (def command-verb-map {"exit" :exit              ;Leave the game
+                       "describe" :describe      ;Print full description of current location
                        "go" :go                  ;Move to a new location
                        "inventory" :inventory})
 
@@ -39,6 +40,9 @@
       (vector :unrecognized)
       (vector lookup-result cmd-target)))) ;Returns vector with command and target or :unrecognized
 
+(defn write-description [loc]
+    (println (str "--" \newline (:description loc) \newline "--" \newline)))
+
 
 (defn write-prompt [loc-key locations]
   (let [loc (loc-key locations)]
@@ -46,15 +50,13 @@
     (println (format "[%s]" (:name loc)))
     (if
       (and (contains? loc :description) (not (loc :visited)))
-      (println (str "--" \newline (:description loc) \newline "--")))
+      (write-description loc))
     (println)
     (print "Your command, sire? ")
     (flush)))
 
-
 (defn validate-map [m]
   (s/validate LocationMap m))
-
 
 (defn load-and-validate
   "Load and validate the location map. If a filename is provided, load map data from the file; otherwise, use test data."
@@ -68,28 +70,28 @@
 
 (defn eval-loop [m]
 
-  (loop [locations (:location-list m)
+  (loop [locations (atom (:location-list m))
          current-loc (atom (:start-location m))
          inventory (atom [:sword "Claymore"])] 
         (do
-          (write-prompt @current-loc locations)
+          (write-prompt @current-loc @locations)
           
           (let [ln (read-line) 
                 cmd-result (process-command ln)
-                [cmd-verb cmd-target] cmd-result
-                mod-loc (assoc-in locations [@current-loc :visited] true)]
-
+                [cmd-verb cmd-target] cmd-result]
+            (swap! locations #(assoc-in % [@current-loc :visited] true))
             (cond
-             (= cmd-verb :go) (let [new-location (cmd/go cmd-target @current-loc mod-loc)]
+             (= cmd-verb :go) (let [new-location (cmd/go cmd-target @current-loc @locations)]
                                 (if (nil? new-location)
                                   (println "Sorry, can't go that way!")
                                   (swap! current-loc  (fn [x] new-location))))
-             (= cmd-verb :inventory) (println (cmd/inventory @inventory)) 
+             (= cmd-verb :inventory) (println (cmd/inventory @inventory))
+             (= cmd-verb :describe)  (swap! locations #(assoc-in % [@current-loc :visited] false))
              (= cmd-verb :exit) (println "Goodbye!")
              :else (println "Unrecognized command"))
             
             (if (not (= cmd-verb :exit))
-              (recur mod-loc 
+              (recur locations 
                      current-loc
                      inventory ))))))
 

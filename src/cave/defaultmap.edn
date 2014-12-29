@@ -11,7 +11,7 @@ local township are gathered here to trade and to catch
 up on the latest gossip. To the north, you see the
 local blacksmith's shop, and to the south is the
 butcher's stand. To the west lie the Great Plains.
-The Town Square continues to the east." 
+The Town Square continues to the east."
                      :e :town-square-east
                      :n :blacksmith
                      :s :butcher

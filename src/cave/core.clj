@@ -1,6 +1,7 @@
 ;Copyright [2014] Keith McFarlane
 ;
 ; cave/core.clj
+; Main game loop and map loading functions
 ;
 ;Licensed under the Apache License, Version 2.0 (the "License");
 ;you may not use this file except in compliance with the License.
@@ -44,8 +45,11 @@
     :south-loc {:name "South loc" :n :test-loc}}})
 
 (defn write-description [loc items-list]
-  (println (str "--" \newline (:description loc) \newline "--" \newline (if (> (count (:inventory loc)) 0) (str "Items:" \newline
-                (apply str (cmd/inventory (:inventory loc) items-list)) \newline "--" \newline)))))
+  (println (str "--" \newline (:description loc) \newline "--" \newline "Items:" \newline 
+                (if (> (count (:inventory loc)) 0)
+                  (str (apply str (cmd/inventory (:inventory loc) items-list)))
+                  "None\n")
+                "--")))
 
 
 (defn write-prompt [loc-key locations m]
@@ -83,7 +87,7 @@ storing state modification over time in several atoms."
           (write-prompt @current-loc @locations m)
           
           (let [ln (read-line)
-                cmd-result (cmd/process-command ln)
+                cmd-result (if (= (str/trim ln) "") [:nothing] (cmd/process-command ln))
                 [cmd-verb cmd-target] cmd-result]
             (swap! locations #(assoc-in % [@current-loc :visited] true))
             (cond
@@ -103,7 +107,7 @@ storing state modification over time in several atoms."
                                       (do
                                         (swap! locations (fn [x] new-map))
                                         (swap! inventory (fn [x] new-inv)))))
-             
+             (= cmd-verb :nothing) nil
              (= cmd-verb :exit) (println "Goodbye!")
              :else (println "Unrecognized command"))
             

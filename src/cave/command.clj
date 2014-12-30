@@ -1,6 +1,7 @@
 ;Copyright [2014] Keith McFarlane
 ;
 ; cave/command.clj
+; Functions for command interpretation and processing
 ;
 ;Licensed under the Apache License, Version 2.0 (the "License");
 ;you may not use this file except in compliance with the License.
@@ -17,7 +18,8 @@
 (ns cave.command)
 
 ;Command mappings
-(def command-verb-map {"exit" :exit              ;Leave the game
+(def command-verb-map {"" :nothing               ;Null command
+                       "exit" :exit              ;Leave the game
                        "describe" :describe      ;Print full description of current location
                        "go" :go                  ;Move to a new location
                        "take" :take              ;Remove an item fromcurrent room and add to player inventory
@@ -31,7 +33,9 @@
 (def command-structure-regex #"\s*([A-Za-z]+)(\s+([A-Za-z0-9]+))?\s*")
                                         ;Matches (white space)(command)(white space)(opt parameter)(white space)
 
-(defn go [direction-str current-loc locations]
+(defn go
+"Computes new map location based on given map and requrested direction."
+[direction-str current-loc locations]
   (let [direction (command-go-directions direction-str)]
     (if (contains? ( locations current-loc ) direction)
       (direction (current-loc locations)) nil )))
@@ -59,18 +63,20 @@ an error message if this can't be done."
 
 (defn leave
 "If the item is held by the player, place it in the current room's inventory."
-  [item inventory location m]
+[item inventory location m]
   (let [found-item (contains? inventory item)]
     (if found-item [(into #{} (remove #(= % item) inventory))
                     (update-in m [location :inventory] #(into #{} (conj %1 %2)) item)]
         ["You do not have that item."])))
 
-(defn process-command [cmd]
+(defn process-command
+"Extract command verb and parameters, returning all in a vector."
+[cmd]
   (let [cmd-vec       (re-matches command-structure-regex cmd)
         [_ cmd-verb _ cmd-target] cmd-vec
         lookup-result (if (nil? cmd-verb) nil (command-verb-map cmd-verb))
         ]
     (if (nil? lookup-result)
-      (vector :unrecognized)
-      (vector lookup-result cmd-target)))) ;Returns vector with command and target or :unrecognized
+      [:unrecognized]
+      [lookup-result cmd-target]))) ;Returns vector with command and target or :unrecognized
 

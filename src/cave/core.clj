@@ -6,15 +6,6 @@
          '[clojure.edn :as edn]
          '[cave.command :as cmd])
 
-;Command mappings
-(def command-verb-map {"exit" :exit              ;Leave the game
-                       "describe" :describe      ;Print full description of current location
-                       "go" :go                  ;Move to a new location
-                       "take" :take              ;Remove an item fromcurrent room and add to player inventory
-                       "leave" :leave            ;Remove item from player inventory and place in this room
-                       "use"  :use               ;Make use of an item in player inventory
-                       "inventory" :inventory})  ;Display player inventory
-
 ;Schema definitions
 (def LocationMap {(s/required-key :start-location) s/Keyword
                   (s/required-key :location-list)
@@ -24,10 +15,6 @@
                                {s/Str s/Str}}}
                   (s/required-key :items-list) {s/Str {(s/required-key :name) s/Str
                                                 (s/required-key :description) s/Str}}})
-
-;Regular expressions
-(def command-structure-regex #"\s*([A-Za-z]+)(\s+([A-Za-z0-9]+))?\s*")
-                                        ;Matches (white space)(command)(white space)(opt parameter)(white space)
 
 (defn load-test-locations []
 
@@ -39,15 +26,6 @@
      :west-loc {:name "West loc" :e :test-loc}
      :north-loc {:name "North loc" :s :test-loc}
     :south-loc {:name "South loc" :n :test-loc}}})
-
-(defn process-command [cmd]
-  (let [cmd-vec       (re-matches command-structure-regex cmd)
-        [_ cmd-verb _ cmd-target] cmd-vec
-        lookup-result (if (nil? cmd-verb) nil (command-verb-map cmd-verb))
-        ]
-    (if (nil? lookup-result)
-      (vector :unrecognized)
-      (vector lookup-result cmd-target)))) ;Returns vector with command and target or :unrecognized
 
 (defn write-description [loc items-list]
   (println (str "--" \newline (:description loc) \newline "--" \newline (if (> (count (:inventory loc)) 0) (str "Items:" \newline
@@ -89,7 +67,7 @@ storing state modification over time in several atoms."
           (write-prompt @current-loc @locations m)
           
           (let [ln (read-line)
-                cmd-result (process-command ln)
+                cmd-result (cmd/process-command ln)
                 [cmd-verb cmd-target] cmd-result]
             (swap! locations #(assoc-in % [@current-loc :visited] true))
             (cond

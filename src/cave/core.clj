@@ -6,7 +6,7 @@
          '[clojure.edn :as edn]
          '[cave.command :as cmd])
 
-;Command maps
+;Command mappings
 (def command-verb-map {"exit" :exit              ;Leave the game
                        "describe" :describe      ;Print full description of current location
                        "go" :go                  ;Move to a new location
@@ -78,15 +78,17 @@
      m)))                       ;return map loaded from disk
 
 
-(defn eval-loop [m]
-
+(defn eval-loop
+"Takes a map (structured as defined by the LocationMap schema) and executes the main game loop,
+storing state modification over time in several atoms."
+  [m]
   (loop [locations (atom (:location-list m))
          current-loc (atom (:start-location m))
          inventory (atom #{})] 
         (do
           (write-prompt @current-loc @locations m)
           
-          (let [ln (read-line) 
+          (let [ln (read-line)
                 cmd-result (process-command ln)
                 [cmd-verb cmd-target] cmd-result]
             (swap! locations #(assoc-in % [@current-loc :visited] true))

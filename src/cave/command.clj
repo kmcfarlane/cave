@@ -9,12 +9,14 @@
 
 (defn inventory
 "Builds a list of strings describing all items in provided inventory set."
-  [inventory items-list]
-  (for [item inventory
+[inventory items-list]
+  (if (> (count inventory) 0) 
+    (for [item inventory
         :let [n (:name (items-list item))
               d (:description (items-list item))]
         :when (contains? items-list item)]
-        (format "%-12s: %s\n" n d)))
+      (format "%-12s: %s\n" n d))
+    '("You aren't holding any items.")))
 
 (defn take-cmd
 "If the desired item exists in the location's inventory, 'move' it to the player's
@@ -24,7 +26,7 @@ an error message if this can't be done."
   (let [loc-inventory (:inventory (location m))
         found-item (contains? loc-inventory item)]
     (if found-item [(conj inventory item) (assoc-in m [location :inventory] (into #{} (remove #(= % item) loc-inventory)))]
-      [(str "Item not found in location inventory.")])))
+      ["That item isn't here."])))
 
 (defn leave
 "If the item is held by the player, place it in the current room's inventory."

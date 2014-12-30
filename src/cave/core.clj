@@ -10,7 +10,8 @@
 (def command-verb-map {"exit" :exit              ;Leave the game
                        "describe" :describe      ;Print full description of current location
                        "go" :go                  ;Move to a new location
-                       "take" :take              ;Remove an item from current room and add to player inventory
+                       "take" :take              ;Remove an item fromcurrent room and add to player inventory
+                       "leave" :leave            ;Remove item from player inventory and place in this room
                        "use"  :use               ;Make use of an item in player inventory
                        "inventory" :inventory})  ;Display player inventory
 
@@ -18,14 +19,15 @@
 (def LocationMap {(s/required-key :start-location) s/Keyword
                   (s/required-key :location-list)
                   {s/Keyword {(s/required-key :name) s/Str (s/optional-key :description) s/Str s/Keyword s/Keyword
-                              (s/optional-key :visited) s/Bool (s/optional-key :inventory) [s/Keyword]
+                              (s/optional-key :visited) s/Bool (s/optional-key :inventory) #{s/Str}
                                (s/optional-key :access-requires-use)
-                               {s/Keyword s/Str}}}
-                  (s/required-key :items-list) {s/Keyword {(s/required-key :name) s/Str
+                               {s/Str s/Str}}}
+                  (s/required-key :items-list) {s/Str {(s/required-key :name) s/Str
                                                 (s/required-key :description) s/Str}}})
 
 ;Regular expressions
-(def command-structure-regex #"\s*([A-Za-z]+)(\s+([A-Za-z0-9]+))?\s*") ;Matches (white space)(command)(white space)(opt parameter)(white space)
+(def command-structure-regex #"\s*([A-Za-z]+)(\s+([A-Za-z0-9]+))?\s*")
+                                        ;Matches (white space)(command)(white space)(opt parameter)(white space)
 
 (defn load-test-locations []
 
@@ -47,17 +49,18 @@
       (vector :unrecognized)
       (vector lookup-result cmd-target)))) ;Returns vector with command and target or :unrecognized
 
-(defn write-description [loc]
-    (println (str "--" \newline (:description loc) \newline "--" \newline)))
+(defn write-description [loc items-list]
+  (println (str "--" \newline (:description loc) \newline "--" \newline (if (> (count (:inventory loc)) 0) (str "Items:" \newline
+                (apply str (cmd/inventory (:inventory loc) items-list)) \newline "--" \newline)))))
 
 
-(defn write-prompt [loc-key locations]
+(defn write-prompt [loc-key locations m]
   (let [loc (loc-key locations)]
     (println)
     (println (format "[%s]" (:name loc)))
     (if
       (and (contains? loc :description) (not (loc :visited)))
-      (write-description loc))
+      (write-description loc (:items-list m)))
     (println)
     (print "Your command, sire? ")
     (flush)))
@@ -79,9 +82,9 @@
 
   (loop [locations (atom (:location-list m))
          current-loc (atom (:start-location m))
-         inventory (atom [:ale :castle-key])] 
+         inventory (atom #{})] 
         (do
-          (write-prompt @current-loc @locations)
+          (write-prompt @current-loc @locations m)
           
           (let [ln (read-line) 
                 cmd-result (process-command ln)
@@ -94,6 +97,17 @@
                                   (swap! current-loc  (fn [x] new-location))))
              (= cmd-verb :inventory) (println (apply str (cmd/inventory @inventory (:items-list m))))
              (= cmd-verb :describe)  (swap! locations #(assoc-in % [@current-loc :visited] false))
+             (= cmd-verb :take) (let [[new-inv new-map] (cmd/take-cmd cmd-target @inventory @current-loc @locations)]
+                                  (if (string? new-inv) (println new-inv)
+                                      (do
+                                        (swap! locations (fn [x] new-map))
+                                        (swap! inventory (fn [x] new-inv)))))
+             (= cmd-verb :leave) (let [[new-inv new-map] (cmd/leave cmd-target @inventory @current-loc @locations)]
+                                  (if (string? new-inv) (println new-inv)
+                                      (do
+                                        (swap! locations (fn [x] new-map))
+                                        (swap! inventory (fn [x] new-inv)))))
+             
              (= cmd-verb :exit) (println "Goodbye!")
              :else (println "Unrecognized command"))
             

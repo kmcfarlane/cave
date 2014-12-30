@@ -43,7 +43,7 @@ The smell of flat ale permeates the tavern's atmosphere,
 and the environs are barely visible under scant
 torchlight." 
            :s :town-square-east
-           :inventory [:ale]
+           :inventory #{"ale"}
           }
 
   :butcher {:name "Butcher"
@@ -57,11 +57,11 @@ torchlight."
             :description
 "" 
             :n :town-square-east
-            :access-requires-use {:ale
+            :inventory #{"key"}
+            :access-requires-use {"ale"
 "The grateful mercenaries drink and begin to tell boring
 battle stories, leaving you unhindered to enter the jeweler's
-shop."} 
-           }
+shop."}}
 
   :castle-gates {:name "Castle Gates"
                  :description
@@ -89,14 +89,10 @@ shop."}
   
   :cave {:name "Cave entrance" :n :plains :s :catacombs}
   
-  :catacombs {:name "The Catacombs" :n :cave}
-  
-  }
+  :catacombs {:name "The Catacombs" :n :cave}}
  
  :items-list
  {
-  :ale {:name "Ale" :description "A mug of the town's flattest, stalest local beverage"
-        }
-  :castle-key {:name "Elegant Key" :description "A large key of the finest craftmanship"}
- }
-}
+  "ale" {:name "Ale" :description "A mug of the town's flattest, stalest local beverage"}
+  "key" {:name "Key" :description "A large key of the finest craftmanship"}
+ }}}

@@ -1,4 +1,4 @@
-;Copyright [2014] Keith McFarlane
+;Copyright 2014 Keith McFarlane
 ;
 ; cave/core.clj
 ; Main game loop and map loading functions

@@ -1,4 +1,4 @@
-;Copyright [2014] Keith McFarlane
+;Copyright 2014 Keith McFarlane
 ;
 ; cave/command.clj
 ; Functions for command interpretation and processing

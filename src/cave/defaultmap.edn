@@ -15,7 +15,8 @@ The Town Square continues to the east."
                      :e :town-square-east
                      :n :blacksmith
                      :s :butcher
-                     :w :plains}
+                     :w :plains
+                     }
   
   :town-square-east {:name "Town Square East"
                      :description
@@ -24,7 +25,7 @@ Merchants, laborers, and various citizens of the local
 township are gathered here to trade and to catch up
 on the latest gossip. To the north, you see a tavern,
 and to the south is the residence of the town's jeweler
-(with several rough-looking mercenaries posted just
+(with several rough, thirsty-looking mercenaries posted just
 outside his doors). To the east, you can see imposing
 gates protecting a menacing castle. The Town Square
 continues to the west." 
@@ -36,8 +37,13 @@ continues to the west."
 
   :tavern {:name "Zedd's Tavern"
            :description
-"" 
+"You enter a dark, dank tavern. It is empty save for
+several drunk patrons and the owner himself, Zedd.
+The smell of flat ale permeates the tavern's atmosphere,
+and the environs are barely visible under scant
+torchlight." 
            :s :town-square-east
+           :inventory [:ale]
           }
 
   :butcher {:name "Butcher"
@@ -51,6 +57,10 @@ continues to the west."
             :description
 "" 
             :n :town-square-east
+            :access-requires-use {:ale
+"The grateful mercenaries drink and begin to tell boring
+battle stories, leaving you unhindered to enter the jeweler's
+shop."} 
            }
 
   :castle-gates {:name "Castle Gates"
@@ -82,4 +92,11 @@ continues to the west."
   :catacombs {:name "The Catacombs" :n :cave}
   
   }
+ 
+ :items-list
+ {
+  :ale {:name "Ale" :description "A mug of the town's flattest, stalest local beverage"
+        }
+  :castle-key {:name "Elegant Key" :description "A large key of the finest craftmanship"}
  }
+}

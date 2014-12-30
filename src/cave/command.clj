@@ -7,5 +7,9 @@
     (if (contains? ( locations current-loc ) direction)
       (direction (current-loc locations)) nil )))
 
-(defn inventory [inventory]
-  (str inventory))
+(defn inventory [inventory, items-list]
+  (for [item inventory
+        :let [n (:name (item items-list))
+              d (:description (item items-list))]
+        :when (contains? items-list item)]
+        (format "%-12s: %s\n" n d)))

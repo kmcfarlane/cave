@@ -10,12 +10,19 @@
 (def command-verb-map {"exit" :exit              ;Leave the game
                        "describe" :describe      ;Print full description of current location
                        "go" :go                  ;Move to a new location
-                       "inventory" :inventory})
+                       "take" :take              ;Remove an item from current room and add to player inventory
+                       "use"  :use               ;Make use of an item in player inventory
+                       "inventory" :inventory})  ;Display player inventory
 
 ;Schema definitions
 (def LocationMap {(s/required-key :start-location) s/Keyword
-                  (s/required-key :location-list) {s/Keyword {(s/required-key :name) s/Str (s/optional-key :description) s/Str s/Keyword s/Keyword
-                                                              (s/optional-key :visited) s/Bool}}})
+                  (s/required-key :location-list)
+                  {s/Keyword {(s/required-key :name) s/Str (s/optional-key :description) s/Str s/Keyword s/Keyword
+                              (s/optional-key :visited) s/Bool (s/optional-key :inventory) [s/Keyword]
+                               (s/optional-key :access-requires-use)
+                               {s/Keyword s/Str}}}
+                  (s/required-key :items-list) {s/Keyword {(s/required-key :name) s/Str
+                                                (s/required-key :description) s/Str}}})
 
 ;Regular expressions
 (def command-structure-regex #"\s*([A-Za-z]+)(\s+([A-Za-z0-9]+))?\s*") ;Matches (white space)(command)(white space)(opt parameter)(white space)
@@ -72,7 +79,7 @@
 
   (loop [locations (atom (:location-list m))
          current-loc (atom (:start-location m))
-         inventory (atom [:sword "Claymore"])] 
+         inventory (atom [:ale :castle-key])] 
         (do
           (write-prompt @current-loc @locations)
           
@@ -85,7 +92,7 @@
                                 (if (nil? new-location)
                                   (println "Sorry, can't go that way!")
                                   (swap! current-loc  (fn [x] new-location))))
-             (= cmd-verb :inventory) (println (cmd/inventory @inventory))
+             (= cmd-verb :inventory) (println (apply str (cmd/inventory @inventory (:items-list m))))
              (= cmd-verb :describe)  (swap! locations #(assoc-in % [@current-loc :visited] false))
              (= cmd-verb :exit) (println "Goodbye!")
              :else (println "Unrecognized command"))

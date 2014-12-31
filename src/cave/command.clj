@@ -33,11 +33,22 @@
 (def command-structure-regex #"\s*([A-Za-z]+)(\s+([A-Za-z0-9]+))?\s*")
                                         ;Matches (white space)(command)(white space)(opt parameter)(white space)
 
+
+
+(defn command-allowed?
+"For a given location and requested direction, determine whether or not travel is currently allowed."
+[direction current-loc]
+  (let [constraints (:items (direction (:constraints current-loc)))
+        inventory (get current-loc :inventory #{})]
+    (if (every? inventory constraints)
+      true
+      (do (println (:disallowed-text (direction (:constraints current-loc)))) false))))
+
 (defn go
 "Computes new map location based on given map and requrested direction."
 [direction-str current-loc locations]
   (let [direction (command-go-directions direction-str)]
-    (if (contains? ( locations current-loc ) direction)
+    (if (and (contains? ( locations current-loc ) direction)(command-allowed? direction (locations current-loc)))
       (direction (current-loc locations)) nil )))
 
 (defn inventory

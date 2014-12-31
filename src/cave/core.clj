@@ -28,8 +28,8 @@
                   (s/required-key :location-list)
                   {s/Keyword {(s/required-key :name) s/Str (s/optional-key :description) s/Str s/Keyword s/Keyword
                               (s/optional-key :visited) s/Bool (s/optional-key :inventory) #{s/Str}
-                               (s/optional-key :access-requires-use)
-                               {s/Str s/Str}}}
+                               (s/optional-key :constraints)
+                               {s/Keyword {(s/required-key :items) [s/Str] s/Keyword s/Str}}}}
                   (s/required-key :items-list) {s/Str {(s/required-key :name) s/Str
                                                 (s/required-key :description) s/Str}}})
 

@@ -32,7 +32,7 @@ continues to the west."
                      :w :town-square-west
                      :e :castle-gates
                      :n :tavern
-                     :s :jeweler
+                     :s :jeweler-entrance
                      }
 
   :tavern {:name "Zedd's Tavern"
@@ -52,23 +52,41 @@ torchlight."
            :n :town-square-west
           }
 
-
-  :jeweler {:name "Jeweler"
-            :description
-"" 
-            :n :town-square-east
-            :inventory #{"key"}
-            :access-requires-use {"ale"
+  :jeweler-entrance {:name "Entrance to Jeweler's Shop"
+                     :description
+"Before you stands the town jeweler's shop, one of the
+best-kept houses in the township, featuring stone walls and
+a heavy oak door. It is guarded by several shady characters,
+all looking quite menacing and somewhat thirsty."
+                     :n :town-square-east
+                     :s :jeweler
+                     :constraints {:s {:items ["ale"]
+:allowed-text
 "The grateful mercenaries drink and begin to tell boring
 battle stories, leaving you unhindered to enter the jeweler's
-shop."}}
+shop."
+:disallowed-text
+"The mercenaries will not allow you to pass."                                       
+}}}
+
+  :jeweler {:name "Jeweler's Shop"
+            :description
+"" 
+            :n :jeweler-entrance
+            :inventory #{"key"}
+           }
 
   :castle-gates {:name "Castle Gates"
                  :description
 "" 
                  :w :town-square-east
                  :e :great-hall
-           }
+                 :constraints {:e {:items ["key"]
+:allowed-text
+""
+:disallowed-text
+"The castle gates are locked."                                       
+}}}
 
   
   :great-hall  {:name "Great Hall" :w :castle-gates :e :throne-room :n :master-bedroom :s :study}
@@ -95,4 +113,4 @@ shop."}}
  {
   "ale" {:name "Ale" :description "A mug of the town's flattest, stalest local beverage"}
   "key" {:name "Key" :description "A large key of the finest craftmanship"}
- }}}
+ }}

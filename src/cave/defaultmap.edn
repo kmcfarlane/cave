@@ -62,9 +62,8 @@ all looking quite menacing and somewhat thirsty."
                      :s :jeweler
                      :constraints {:s {:items ["ale"]
 :allowed-text
-"The grateful mercenaries drink and begin to tell boring
-battle stories, leaving you unhindered to enter the jeweler's
-shop."
+"The grateful mercenaries drink and tell boring battle stories,
+leaving you free to enter the jeweler's shop."
 :disallowed-text
 "The mercenaries will not allow you to pass."                                       
 }}}
@@ -83,7 +82,7 @@ shop."
                  :e :great-hall
                  :constraints {:e {:items ["key"]
 :allowed-text
-""
+"The castle gates are unlocked, and you pass through unhindered."
 :disallowed-text
 "The castle gates are locked."                                       
 }}}

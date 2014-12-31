@@ -41,7 +41,9 @@
   (let [constraints (:items (direction (:constraints current-loc)))
         inventory (get current-loc :inventory #{})]
     (if (every? inventory constraints)
-      true
+      (let [allowed-text (get (direction (:constraints current-loc)) :allowed-text nil)]
+        (if (not (nil? allowed-text)) (println allowed-text))
+        true)
       (do (println (:disallowed-text (direction (:constraints current-loc)))) false))))
 
 (defn go

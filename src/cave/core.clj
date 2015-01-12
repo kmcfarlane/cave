@@ -90,26 +90,28 @@ storing state modification over time in several atoms."
                 cmd-result (if (= (str/trim ln) "") [:nothing] (cmd/process-command ln))
                 [cmd-verb cmd-target] cmd-result]
             (swap! locations #(assoc-in % [@current-loc :visited] true))
-            (cond
-             (= cmd-verb :go) (let [new-location (cmd/go cmd-target @current-loc @locations)]
+            (case cmd-verb
+             :go (let [new-location (cmd/go cmd-target @current-loc @locations)]
                                 (if (nil? new-location)
                                   (println "Sorry, can't go that way!")
                                   (swap! current-loc  (fn [x] new-location))))
-             (= cmd-verb :inventory) (println (apply str (cmd/inventory @inventory (:items-list m))))
-             (= cmd-verb :describe)  (swap! locations #(assoc-in % [@current-loc :visited] false))
-             (= cmd-verb :take) (let [[new-inv new-map] (cmd/take-cmd cmd-target @inventory @current-loc @locations)]
+             :inventory (println (apply str (cmd/inventory @inventory (:items-list m))))
+             :describe  (swap! locations #(assoc-in % [@current-loc :visited] false))
+             :take (let [[new-inv new-map] (cmd/take-cmd cmd-target @inventory @current-loc @locations)]
                                   (if (string? new-inv) (println new-inv)
                                       (do
                                         (swap! locations (fn [x] new-map))
                                         (swap! inventory (fn [x] new-inv)))))
-             (= cmd-verb :leave) (let [[new-inv new-map] (cmd/leave cmd-target @inventory @current-loc @locations)]
+             :leave (let [[new-inv new-map] (cmd/leave cmd-target @inventory @current-loc @locations)]
                                   (if (string? new-inv) (println new-inv)
                                       (do
                                         (swap! locations (fn [x] new-map))
                                         (swap! inventory (fn [x] new-inv)))))
-             (= cmd-verb :nothing) nil
-             (= cmd-verb :exit) (println "Goodbye!")
-             :else (println "Unrecognized command"))
+             :nothing nil
+             :exit (println "Goodbye!")
+
+             ;default case
+             (println "Unrecognized command"))
             
             (if (not (= cmd-verb :exit))
               (recur locations 
